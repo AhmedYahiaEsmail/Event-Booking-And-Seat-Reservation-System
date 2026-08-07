@@ -1,3 +1,7 @@
+using EventBooking.API.Extensions;
+using EventBooking.Application.Extensions;
+using EventBooking.Infrastructure.Extensions;
+
 namespace EventBooking.API;
 
 public class Program
@@ -6,23 +10,15 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-        builder.Services.AddControllers();
-
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
+        // Register Services (Presentation, Application, Infrastructure)
+        builder.Services.AddPresentation();
+        builder.Services.AddApplication();
+        builder.Services.AddInfrastructure(builder.Configuration);
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
-
-        app.UseHttpsRedirection();
-        app.UseAuthorization();
-        app.MapControllers();
+        // Configure HTTP Request Pipeline
+        app.UsePresentation();
 
         app.Run();
     }
