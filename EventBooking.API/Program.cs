@@ -13,7 +13,7 @@ public class Program
         // Register Services (Presentation, Application, Infrastructure)
         builder.Services.AddPresentation();
         builder.Services.AddApplication();
-        builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
         var app = builder.Build();
 

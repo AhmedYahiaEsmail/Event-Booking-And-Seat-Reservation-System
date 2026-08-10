@@ -21,6 +21,9 @@ public static class ApplicationBuilderExtensions
         app.UseMiddleware<GlobalExceptionMiddleware>();
 
         app.UseHttpsRedirection();
+
+        // Authentication & Authorization Middleware Pipeline
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

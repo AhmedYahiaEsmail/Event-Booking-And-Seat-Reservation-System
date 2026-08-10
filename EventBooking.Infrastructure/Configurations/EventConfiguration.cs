@@ -15,7 +15,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         {
             // Database-Level Constraints for Integrity
             t.HasCheckConstraint("CK_Event_TotalSeats", "[TotalSeats] > 0");
-            t.HasCheckConstraint("CK_Event_AvailableSeats", "[AvailableSeats] >= 0 AND [AvailableSeats] <= `[TotalSeats]");
+            t.HasCheckConstraint("CK_Event_AvailableSeats", "[AvailableSeats] >= 0 AND [AvailableSeats] <= [TotalSeats]");
             t.HasCheckConstraint("CK_Event_Dates", "[EndDateTime] > [StartDateTime]");
         });
         builder.HasKey(e => e.Id);

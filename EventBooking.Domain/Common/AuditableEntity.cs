@@ -13,4 +13,23 @@ public abstract class AuditableEntity
     public string? UpdatedBy { get; protected set; }
     public bool IsDeleted { get; protected set; }
     public DateTimeOffset? DeletedAt { get; protected set; }
+
+    public void SetCreationInfo(string? createdBy = null)
+    {
+        CreatedAt = DateTimeOffset.UtcNow;
+        CreatedBy = createdBy;
+    }
+
+    public void SetUpdateInfo(string? updatedBy = null)
+    {
+        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdatedBy = updatedBy;
+    }
+
+    public void MarkAsDeleted(string? deletedBy = null)
+    {
+        IsDeleted = true;
+        DeletedAt = DateTimeOffset.UtcNow;
+        UpdatedBy = deletedBy;
+    }
 }
