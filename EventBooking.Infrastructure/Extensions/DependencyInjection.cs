@@ -1,8 +1,10 @@
 ﻿using EventBooking.Application.Interfaces.Auth;
+using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Domain.Enums;
 using EventBooking.Infrastructure.Configurations;
 using EventBooking.Infrastructure.Identity;
 using EventBooking.Infrastructure.Persistence;
+using EventBooking.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +66,9 @@ public static class DependencyInjection
         services.AddAuthorizationBuilder()
             .AddPolicy("RequireAdminRole", policy => policy.RequireRole(UserRole.Admin.ToString()))
             .AddPolicy("RequireUserRole", policy => policy.RequireRole(UserRole.User.ToString()));
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
