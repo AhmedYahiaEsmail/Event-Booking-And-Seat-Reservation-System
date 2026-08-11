@@ -13,11 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Filters\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\EventBooking.Application\EventBooking.Application.csproj" />
     <ProjectReference Include="..\EventBooking.Infrastructure\EventBooking.Infrastructure.csproj" />
   </ItemGroup>

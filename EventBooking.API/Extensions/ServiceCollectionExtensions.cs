@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using EventBooking.API.Filters;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
 
 namespace EventBooking.API.Extensions;
@@ -7,7 +9,18 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers(options =>
+        {
+            // Register our custom validation filter globally
+            options.Filters.Add<ValidationFilter>();
+        });
+
+        // Suppress default model state validation so our ValidationFilter handles it consistently
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
+
         services.AddEndpointsApiExplorer();
 
         // Configure Swagger
