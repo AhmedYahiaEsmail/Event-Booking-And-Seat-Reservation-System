@@ -1,9 +1,6 @@
 ﻿using EventBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Infrastructure.Configurations;
 
@@ -13,25 +10,25 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
     {
         builder.ToTable("Events", t =>
         {
-            // Database-Level Constraints for Integrity
             t.HasCheckConstraint("CK_Event_TotalSeats", "[TotalSeats] > 0");
             t.HasCheckConstraint("CK_Event_AvailableSeats", "[AvailableSeats] >= 0 AND [AvailableSeats] <= [TotalSeats]");
             t.HasCheckConstraint("CK_Event_Dates", "[EndDateTime] > [StartDateTime]");
         });
+
         builder.HasKey(e => e.Id);
 
+        // Max lengths aligned 100% with FluentValidation rules
         builder.Property(e => e.Title).IsRequired().HasMaxLength(200);
-        builder.Property(e => e.Description).HasMaxLength(1000);
-        builder.Property(e => e.Location).IsRequired().HasMaxLength(200);
-        builder.Property(e => e.SpeakerName).IsRequired().HasMaxLength(100);
-        builder.Property(e => e.SpeakerBio).HasMaxLength(500);
+        builder.Property(e => e.Description).HasMaxLength(2000);
+        builder.Property(e => e.Location).IsRequired().HasMaxLength(300);
+        builder.Property(e => e.SpeakerName).IsRequired().HasMaxLength(150);
+        builder.Property(e => e.SpeakerBio).HasMaxLength(1000);
         builder.Property(e => e.Status).IsRequired().HasConversion<string>().HasMaxLength(20);
 
-        // Optimistic Concurrency Mechanism (Infrastructure only - Shadow Property)
-        // This keeps the Domain pure without needing a byte[] RowVersion in the entity.
+        // Concurrency
         builder.Property<byte[]>("RowVersion").IsRowVersion();
 
-        // Indexes for Event Discovery
+        // Indexes
         builder.HasIndex(e => e.StartDateTime);
         builder.HasIndex(e => e.Status);
 
@@ -41,7 +38,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
                .HasForeignKey(r => r.EventId)
                .OnDelete(DeleteBehavior.Restrict);
 
-        // Soft Delete Global Query Filter
+        // Global Query Filter for Soft Delete
         builder.HasQueryFilter(e => !e.IsDeleted);
     }
 }

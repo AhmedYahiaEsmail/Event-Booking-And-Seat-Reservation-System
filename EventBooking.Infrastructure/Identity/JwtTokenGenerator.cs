@@ -1,5 +1,4 @@
-﻿using EventBooking.Application.Common;
-using EventBooking.Application.Interfaces.Auth;
+﻿using EventBooking.Application.Interfaces.Auth;
 using EventBooking.Domain.Entities;
 using EventBooking.Infrastructure.Configurations;
 using Microsoft.Extensions.Options;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EventBooking.Application.Common;
+namespace EventBooking.Infrastructure.Configurations;
 
 public class ConnectionStringsSettings
 {
