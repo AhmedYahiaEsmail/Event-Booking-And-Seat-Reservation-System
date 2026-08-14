@@ -68,6 +68,7 @@ public static class DependencyInjection
             .AddPolicy("RequireUserRole", policy => policy.RequireRole(UserRole.User.ToString()));
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

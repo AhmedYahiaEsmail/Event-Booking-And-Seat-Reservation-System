@@ -10,4 +10,5 @@ public record UpdateEventRequest(
     string Location,
     string SpeakerName,
     string? SpeakerBio,
-    int TotalSeats);
+    int TotalSeats,
+    byte[] RowVersion);

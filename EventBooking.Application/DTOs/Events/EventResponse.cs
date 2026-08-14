@@ -14,4 +14,5 @@ public record EventResponse(
     string? SpeakerBio,
     int TotalSeats,
     int AvailableSeats,
-    EventStatus Status);
+    EventStatus Status,
+    byte[] RowVersion);

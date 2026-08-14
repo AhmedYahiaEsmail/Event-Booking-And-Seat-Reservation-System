@@ -22,6 +22,10 @@ public class Event : AuditableEntity
     public int AvailableSeats { get; private set; } = 0;
     public EventStatus Status { get; private set; } = EventStatus.Draft;
 
+    // SQL Server rowversion optimistic-concurrency token. Value is generated and
+    // maintained entirely by the database; EF Core populates it after insert/update.
+    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
+
     private readonly List<Reservation> _reservations = new();
     public IReadOnlyCollection<Reservation> Reservations => _reservations.AsReadOnly();
 

@@ -25,8 +25,10 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.SpeakerBio).HasMaxLength(1000);
         builder.Property(e => e.Status).IsRequired().HasConversion<string>().HasMaxLength(20);
 
-        // Concurrency
-        builder.Property<byte[]>("RowVersion").IsRowVersion();
+        // Concurrency: RowVersion is now a real property on Event (see TASK-02 report for
+        // why it was converted from a shadow property). IsRowVersion() configures it as a
+        // database-generated, SQL Server rowversion concurrency token.
+        builder.Property(e => e.RowVersion).IsRowVersion();
 
         // Indexes
         builder.HasIndex(e => e.StartDateTime);
