@@ -2,6 +2,7 @@
 using EventBooking.Application.Exceptions;
 using EventBooking.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
@@ -51,6 +52,14 @@ public class GlobalExceptionMiddleware
             case InvalidCredentialsException e:
                 statusCode = HttpStatusCode.Unauthorized;
                 message = e.Message;
+                break;
+            case EventNotFoundException e:
+                statusCode = HttpStatusCode.NotFound;
+                message = e.Message;
+                break;
+            case DbUpdateConcurrencyException e:
+                statusCode = HttpStatusCode.Conflict;
+                message = "The event was modified by another user after you loaded it. Reload the event and try again.";
                 break;
             case DomainException e:
                 statusCode = HttpStatusCode.BadRequest;

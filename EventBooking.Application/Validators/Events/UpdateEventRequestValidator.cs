@@ -31,5 +31,8 @@ public class UpdateEventRequestValidator : AbstractValidator<UpdateEventRequest>
         RuleFor(x => x.EndDateTime)
             .GreaterThan(x => x.StartDateTime)
             .WithMessage("End date time must be after start date time.");
+
+        RuleFor(x => x.RowVersion)
+            .NotEmpty().WithMessage("RowVersion is required for concurrency control.");
     }
 }
