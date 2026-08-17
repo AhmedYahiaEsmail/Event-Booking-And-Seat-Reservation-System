@@ -57,6 +57,14 @@ public class GlobalExceptionMiddleware
                 statusCode = HttpStatusCode.NotFound;
                 message = e.Message;
                 break;
+            case ReservationNotFoundException e:
+                statusCode = HttpStatusCode.NotFound;
+                message = e.Message;
+                break;
+            case ReservationAccessDeniedException e:
+                statusCode = HttpStatusCode.Forbidden;
+                message = e.Message;
+                break;
             case DbUpdateConcurrencyException e:
                 statusCode = HttpStatusCode.Conflict;
                 message = "The event was modified by another user after you loaded it. Reload the event and try again.";

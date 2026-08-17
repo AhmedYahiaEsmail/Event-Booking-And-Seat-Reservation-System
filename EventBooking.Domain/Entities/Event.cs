@@ -29,8 +29,6 @@ public class Event : AuditableEntity
     private readonly List<Reservation> _reservations = new();
     public IReadOnlyCollection<Reservation> Reservations => _reservations.AsReadOnly();
 
-    public Event() { }
-
     // ==========================================
     // CUSTOM DOMAIN LOGIC (Business Invariants)
     // ==========================================

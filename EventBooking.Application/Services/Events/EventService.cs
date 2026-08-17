@@ -167,7 +167,7 @@ public class EventService : IEventService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    private static EventResponse MapToResponse(Domain.Entities.Event eventEntity)
+    private static EventResponse MapToResponse(Event eventEntity)
     {
         return new EventResponse(
             eventEntity.Id,

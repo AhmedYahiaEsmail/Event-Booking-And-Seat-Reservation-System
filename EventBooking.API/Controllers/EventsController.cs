@@ -17,15 +17,14 @@ public class EventsController : ControllerBase
         _eventService = eventService;
     }
 
-    // Browsing endpoints require an authenticated account but are not restricted to a
-    // single role: RequireAdminRole/RequireUserRole check for an exact role match, so
-    // using either alone would lock out the other role from browsing the catalog. Since
-    // the project documentation doesn't scope catalog browsing to one specific role,
-    // plain [Authorize] (any authenticated user) is used here rather than inventing a
-    // new policy.
+    // Browsing endpoints are public per product decision: catalog browsing (list,
+    // upcoming, by-id) requires no authentication at all. [AllowAnonymous] is used
+    // explicitly on each action below rather than simply omitting [Authorize], so the
+    // intent stays unambiguous even if a controller-level [Authorize] is ever added
+    // later.
 
     [HttpGet]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetEvents([FromQuery] EventQueryParameters queryParams, CancellationToken cancellationToken)
     {
         var response = await _eventService.GetEventsAsync(queryParams, cancellationToken);
@@ -33,7 +32,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("upcoming")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetUpcomingEvents([FromQuery] EventQueryParameters queryParams, CancellationToken cancellationToken)
     {
         var response = await _eventService.GetUpcomingEventsAsync(queryParams, cancellationToken);
@@ -41,7 +40,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetEventById(Guid id, CancellationToken cancellationToken)
     {
         var response = await _eventService.GetEventByIdAsync(id, cancellationToken);
@@ -81,5 +80,38 @@ public class EventsController : ControllerBase
         // so it is intentionally not wrapped in ApiResponse<T> (see implementation report).
         await _eventService.DeleteEventAsync(id, cancellationToken);
         return NoContent();
+    }
+
+    // Lifecycle endpoints — thin wrappers over IEventService.PublishEventAsync /
+    // CancelEventAsync / CompleteEventAsync, which in turn call Event.Publish() /
+    // .Cancel() / .Complete() on the domain entity. All invalid-transition rules (e.g.
+    // publishing an already-published event, or completing one before its end time)
+    // are enforced entirely inside those domain methods and surface as
+    // DomainException -> 400 Bad Request via the existing GlobalExceptionMiddleware.
+    // No additional validation or exception handling is added here, matching the
+    // existing thinness of CreateEvent/UpdateEvent/DeleteEvent above.
+
+    [HttpPost("{id:guid}/publish")]
+    [Authorize(Policy = "RequireAdminRole")]
+    public async Task<IActionResult> PublishEvent(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _eventService.PublishEventAsync(id, cancellationToken);
+        return Ok(ApiResponse<EventResponse>.Success(response, "Event published successfully."));
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    [Authorize(Policy = "RequireAdminRole")]
+    public async Task<IActionResult> CancelEvent(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _eventService.CancelEventAsync(id, cancellationToken);
+        return Ok(ApiResponse<EventResponse>.Success(response, "Event cancelled successfully."));
+    }
+
+    [HttpPost("{id:guid}/complete")]
+    [Authorize(Policy = "RequireAdminRole")]
+    public async Task<IActionResult> CompleteEvent(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _eventService.CompleteEventAsync(id, cancellationToken);
+        return Ok(ApiResponse<EventResponse>.Success(response, "Event marked as completed."));
     }
 }

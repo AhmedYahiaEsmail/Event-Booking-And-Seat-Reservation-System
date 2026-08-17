@@ -23,14 +23,34 @@ public class ReservationRepository : IReservationRepository
     public async Task<Reservation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         // Tracking is preserved deliberately (no AsNoTracking), and the related Event is
-        // included in the same tracked graph. The upcoming cancellation workflow needs to
-        // mutate both the Reservation (Cancel()) and its Event (ReleaseSeats()) within a
-        // single DbContext instance so both changes commit together through one
-        // IUnitOfWork.SaveChangesAsync() call / one database transaction. The global
-        // soft-delete query filters on both Reservation and Event are not bypassed here.
-        return await _context.Reservations
+        // included in the same tracked graph. The upcoming (TASK-05) cancellation
+        // workflow mutates both the Reservation (Cancel()) and its Event (ReleaseSeats())
+        // within this single DbContext instance so both changes commit together through
+        // one IUnitOfWork.SaveChangesAsync() call / one database transaction.
+        var reservation = await _context.Reservations
             .Include(r => r.Event)
             .SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+
+        if (reservation is not null && reservation.Event is null)
+        {
+            // TASK-05 soft-delete decision: the Include above respects Event's global
+            // soft-delete query filter, so a soft-deleted Event comes back as null even
+            // though reservation.EventId still points at a real row. Cancellation must
+            // still be able to release seats on that Event regardless of its soft-delete
+            // state (see implementation report Section 8 for the full reasoning).
+            //
+            // This is a narrowly scoped, deliberate fallback: IgnoreQueryFilters() is
+            // applied only to this single follow-up query for the one specific Event row
+            // already referenced by this Reservation's EventId. It never affects the
+            // Reservation query above, and the global query filter itself is untouched.
+            // Once loaded, EF Core's relationship fixup automatically wires this Event
+            // into reservation.Event because both are tracked in the same DbContext.
+            await _context.Events
+                .IgnoreQueryFilters()
+                .SingleOrDefaultAsync(e => e.Id == reservation.EventId, cancellationToken);
+        }
+
+        return reservation;
     }
 
     public async Task<IReadOnlyList<Reservation>> GetUserReservationsAsync(

@@ -11,7 +11,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Register Services (Presentation, Application, Infrastructure)
-        builder.Services.AddPresentation();
+        builder.Services.AddPresentation(builder.Configuration);
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
