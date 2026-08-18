@@ -33,6 +33,16 @@ public static class ServiceCollectionExtensions
                 Version = "v1",
                 Description = "Event Booking & Seat Reservation System API"
             });
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter your JWT token directly below."
+            });
         });
 
         // Configure Health Check Endpoint Infrastructure
