@@ -14,7 +14,13 @@ public static class ServiceCollectionExtensions
         {
             // Register our custom validation filter globally
             options.Filters.Add<ValidationFilter>();
-        });
+        })
+        .AddJsonOptions(options =>
+         {
+             options.JsonSerializerOptions.Converters.Add(
+                 new System.Text.Json.Serialization.JsonStringEnumConverter()
+             );
+         });
 
         // Suppress default model state validation so our ValidationFilter handles it consistently
         services.Configure<ApiBehaviorOptions>(options =>
