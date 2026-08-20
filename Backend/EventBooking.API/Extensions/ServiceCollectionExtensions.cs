@@ -49,6 +49,15 @@ public static class ServiceCollectionExtensions
                 In = ParameterLocation.Header,
                 Description = "Enter your JWT token directly below."
             });
+
+            options.AddSecurityRequirement(document =>
+            {
+                var schemeReference = new OpenApiSecuritySchemeReference("Bearer", document);
+                return new OpenApiSecurityRequirement
+                {
+                    [schemeReference] = new List<string>()
+                };
+            });
         });
 
         // Configure Health Check Endpoint Infrastructure

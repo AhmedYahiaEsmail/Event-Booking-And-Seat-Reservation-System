@@ -3,8 +3,9 @@ import { format, parseISO } from 'date-fns';
 // Kept as its own component (rather than inlined in AdminDashboardPage) because a
 // future step adds an Edit action to these same rows — this keeps that addition
 // isolated to one file instead of reworking the table markup in the page.
-export default function AdminEventRow({ event, isActioning, onPublish, onCancel, onComplete }) {
+export default function AdminEventRow({ event, isActioning, onPublish, onCancel, onComplete, onEdit }) {
   const { id, title, status, startDateTime, availableSeats, totalSeats } = event;
+  const isEditable = status === 'Draft' || status === 'Published';
 
   return (
     <tr className="border-b border-gray-200">
@@ -46,6 +47,17 @@ export default function AdminEventRow({ event, isActioning, onPublish, onCancel,
                 {isActioning ? 'Completing...' : 'Complete'}
               </button>
             </>
+          )}
+
+          {isEditable && (
+            <button
+              type="button"
+              onClick={() => onEdit(event)}
+              disabled={isActioning}
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Edit
+            </button>
           )}
         </div>
       </td>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { format, parseISO } from 'date-fns';
 import * as eventsApi from '../api/eventsApi';
 import { ApiError } from '../api/client';
 import AdminEventRow from '../components/AdminEventRow';
@@ -26,6 +27,10 @@ export default function AdminDashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrorMessage, setFormErrorMessage] = useState(null);
   const [formErrorList, setFormErrorList] = useState(null);
+  // null => Create mode, set => Edit mode. Deliberately not tracked with a
+  // separate isEditing boolean — the presence of an event here is what the
+  // form's mode is derived from everywhere below.
+  const [editingEvent, setEditingEvent] = useState(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -70,36 +75,84 @@ export default function AdminDashboardPage() {
     setFormValues((current) => ({ ...current, [field]: value }));
   }
 
-  async function handleCreateSubmit(event) {
+  function handleEditClick(event) {
+    setEditingEvent(event);
+    setFormErrorMessage(null);
+    setFormErrorList(null);
+    setFormValues({
+      title: event.title,
+      description: event.description ?? '',
+      // Reverse of the ISO -> datetime-local conversion the Create path does on
+      // submit, so the existing dates populate the datetime-local inputs correctly
+      // instead of showing raw ISO strings.
+      startDateTime: format(parseISO(event.startDateTime), "yyyy-MM-dd'T'HH:mm"),
+      endDateTime: format(parseISO(event.endDateTime), "yyyy-MM-dd'T'HH:mm"),
+      location: event.location,
+      speakerName: event.speakerName,
+      speakerBio: event.speakerBio ?? '',
+      totalSeats: event.totalSeats,
+      // rowVersion is deliberately NOT copied into formValues — it isn't a
+      // rendered field. It's read straight from editingEvent.rowVersion when the
+      // update payload is built in handleFormSubmit below.
+    });
+  }
+
+  function handleCancelEdit() {
+    setEditingEvent(null);
+    setFormValues(EMPTY_FORM);
+    setFormErrorMessage(null);
+    setFormErrorList(null);
+  }
+
+  async function handleFormSubmit(event) {
     event.preventDefault();
     setFormErrorMessage(null);
     setFormErrorList(null);
     setIsSubmitting(true);
 
-    try {
-      const payload = {
-        title: formValues.title,
-        // Omit optional fields entirely when left empty rather than sending
-        // empty strings.
-        description: formValues.description.trim() || undefined,
-        startDateTime: new Date(formValues.startDateTime).toISOString(),
-        endDateTime: new Date(formValues.endDateTime).toISOString(),
-        location: formValues.location,
-        speakerName: formValues.speakerName,
-        speakerBio: formValues.speakerBio.trim() || undefined,
-        totalSeats: Number(formValues.totalSeats),
-      };
+    const payload = {
+      title: formValues.title,
+      // Omit optional fields entirely when left empty rather than sending
+      // empty strings.
+      description: formValues.description.trim() || undefined,
+      startDateTime: new Date(formValues.startDateTime).toISOString(),
+      endDateTime: new Date(formValues.endDateTime).toISOString(),
+      location: formValues.location,
+      speakerName: formValues.speakerName,
+      speakerBio: formValues.speakerBio.trim() || undefined,
+      totalSeats: Number(formValues.totalSeats),
+    };
 
-      await eventsApi.createEvent(payload);
+    try {
+      if (editingEvent) {
+        await eventsApi.updateEvent(editingEvent.id, { ...payload, rowVersion: editingEvent.rowVersion });
+      } else {
+        await eventsApi.createEvent(payload);
+      }
+
+      setEditingEvent(null);
       setFormValues(EMPTY_FORM);
       setRefetchTrigger((current) => current + 1);
     } catch (error) {
-      if (error instanceof ApiError) {
+      // Checked first, ahead of the generic three-way branch: a 409 here means
+      // someone else changed this event since it was loaded, not a validation
+      // failure. error.message is already the exact backend-authored text, shown
+      // as-is. Recovery is reset-to-create-mode + refetch, per spec — no diffing
+      // or merge UI, and no attempt to keep the user's in-progress edits, since
+      // the rowVersion they submitted against is stale.
+      if (error instanceof ApiError && error.status === 409) {
+        setFormErrorMessage(error.message);
+        setEditingEvent(null);
+        setFormValues(EMPTY_FORM);
+        setRefetchTrigger((current) => current + 1);
+      } else if (error instanceof ApiError) {
         if (Array.isArray(error.errors) && error.errors.length > 0) {
           setFormErrorList(error.errors);
         } else {
           setFormErrorMessage(error.message);
         }
+        // editingEvent/formValues intentionally left untouched here so the
+        // Admin can see and fix their input without losing their edits.
       } else {
         setFormErrorMessage('Something went wrong. Please try again.');
       }
@@ -140,9 +193,11 @@ export default function AdminDashboardPage() {
       <h1 className="mb-6 text-xl font-semibold text-gray-900">Admin Dashboard</h1>
 
       <section className="mb-10 rounded-md border border-gray-200 p-4">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Create Event</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          {editingEvent ? 'Edit Event' : 'Create Event'}
+        </h2>
 
-        <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="title" className="text-sm font-medium text-gray-700">
               Title
@@ -264,13 +319,31 @@ export default function AdminDashboardPage() {
 
           {formErrorMessage && <p className="text-sm text-red-600">{formErrorMessage}</p>}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-fit rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Creating...' : 'Create Event'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-fit rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting
+                ? editingEvent
+                  ? 'Saving...'
+                  : 'Creating...'
+                : editingEvent
+                  ? 'Save Changes'
+                  : 'Create Event'}
+            </button>
+
+            {editingEvent && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="w-fit rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </section>
 
@@ -314,6 +387,7 @@ export default function AdminDashboardPage() {
                     onPublish={handlePublish}
                     onCancel={handleCancel}
                     onComplete={handleComplete}
+                    onEdit={handleEditClick}
                   />
                 ))}
               </tbody>

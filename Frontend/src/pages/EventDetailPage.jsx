@@ -126,10 +126,10 @@ export default function EventDetailPage() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-xl font-semibold text-gray-900">{event.title}</h1>
-                {event.description && (
-          <p className="text-sm text-gray-700 leading-relaxed my-1">
-            {event.description}
-           </p>
+        {event.description && (
+        <p className="text-sm text-gray-700 leading-relaxed my-1">
+          {event.description}
+        </p>
         )}
         <p className="text-sm text-gray-600">{dateRange}</p>
         <p className="text-sm text-gray-600">{event.location}</p>
