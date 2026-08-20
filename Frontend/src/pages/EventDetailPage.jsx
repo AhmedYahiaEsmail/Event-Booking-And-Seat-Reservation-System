@@ -129,7 +129,7 @@ export default function EventDetailPage() {
         {event.description && (
           <p className="text-sm text-gray-700 leading-relaxed my-1">
             {event.description}
-          </p>
+           </p>
         )}
         <p className="text-sm text-gray-600">{dateRange}</p>
         <p className="text-sm text-gray-600">{event.location}</p>
