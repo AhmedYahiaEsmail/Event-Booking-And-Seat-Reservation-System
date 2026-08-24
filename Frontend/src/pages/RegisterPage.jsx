@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import { ErrorAlert } from '../components/ui/Alert';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -21,9 +24,6 @@ export default function RegisterPage() {
     setErrorMessage(null);
     setErrorList(null);
 
-    // Only client-side rule beyond HTML5 `required`: catch a typo'd confirmation
-    // before ever calling the API. Full password-complexity rules are enforced
-    // by the backend and surfaced via ApiError.errors below.
     if (password !== confirmPassword) {
       setErrorMessage('Passwords do not match.');
       return;
@@ -50,106 +50,75 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-65px)] items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-md border border-gray-200 p-6">
-        <h1 className="mb-6 text-lg font-semibold text-gray-900">Register</h1>
+    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
+        <div className="h-1.5 w-full bg-accent" />
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-              First name
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              value={firstName}
-              onChange={(event) => setFirstName(event.target.value)}
-              required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-            />
-          </div>
+        <div className="p-7">
+          <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">Get started</p>
+          <h1 className="mt-1 font-display text-xl font-semibold text-ink">Create your account</h1>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-              Last name
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              value={lastName}
-              onChange={(event) => setLastName(event.target.value)}
-              required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="First name"
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+                required
+              />
+              <Input
+                label="Last name"
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
+                required
+              />
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
+            <Input
+              label="Email"
               id="email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
-          </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
+            <Input
+              label="Password"
               id="password"
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
-          </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-              Confirm password
-            </label>
-            <input
+            <Input
+              label="Confirm password"
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
-          </div>
 
-          {errorList && (
-            <ul className="list-inside list-disc text-sm text-red-600">
-              {errorList.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
-          )}
+            <ErrorAlert message={errorMessage} list={errorList} />
 
-          {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+            <Button type="submit" disabled={isSubmitting} className="mt-1 w-full">
+              {isSubmitting ? 'Registering...' : 'Register'}
+            </Button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Registering...' : 'Register'}
-          </button>
-        </form>
-
-        <p className="mt-4 text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-gray-900 hover:underline">
-            Log in
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-ink-soft">
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-primary hover:underline">
+              Log in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

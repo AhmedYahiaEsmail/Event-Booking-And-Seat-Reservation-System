@@ -1,1 +1,76 @@
 @import "tailwindcss";
+
+@theme {
+  --color-paper: #ffffff;
+  --color-surface: #f4f5f7;
+  --color-surface-hover: #eceef2;
+  --color-ink: #16181d;
+  --color-ink-soft: #5b6472;
+  --color-ink-faint: #9aa1ac;
+  --color-line: #e2e4e9;
+
+  --color-primary: #2e3192;
+  --color-primary-hover: #252775;
+  --color-primary-soft: #eeeffa;
+
+  --color-accent: #c98a2c;
+  --color-accent-soft: #fbf1de;
+
+  --color-success: #1d8a5d;
+  --color-success-soft: #e7f5ee;
+  --color-warning: #b8860b;
+  --color-warning-soft: #fbf3dc;
+  --color-danger: #c4372b;
+  --color-danger-soft: #fbe9e7;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+:root.dark {
+  --color-paper: #15171c;
+  --color-surface: #1d2027;
+  --color-surface-hover: #262a33;
+  --color-ink: #f1f2f4;
+  --color-ink-soft: #a7aeb9;
+  --color-ink-faint: #6b7280;
+  --color-line: #2b2f38;
+
+  --color-primary: #6669e0;
+  --color-primary-hover: #7a7de8;
+  --color-primary-soft: #24274d;
+
+  --color-accent: #d9a441;
+  --color-accent-soft: #392d14;
+
+  --color-success: #34d399;
+  --color-success-soft: #10291f;
+  --color-warning: #eab308;
+  --color-warning-soft: #302505;
+  --color-danger: #f87171;
+  --color-danger-soft: #341616;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+::selection {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

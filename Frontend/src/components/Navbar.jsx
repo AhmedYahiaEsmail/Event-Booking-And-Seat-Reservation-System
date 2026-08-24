@@ -1,55 +1,148 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import Button from './ui/Button';
 
 export default function Navbar() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   function handleLogout() {
+    setIsMenuOpen(false);
     logout();
     navigate('/');
   }
 
   return (
-    <nav className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-      <Link to="/" className="text-lg font-semibold text-gray-900">
-        Event Booking
-      </Link>
+    <nav className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+        <Link
+          to="/"
+          onClick={() => setIsMenuOpen(false)}
+          className="flex items-center gap-2 font-display text-lg font-semibold text-ink"
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary font-mono text-xs font-bold text-white">
+            EB
+          </span>
+          Event Booking
+        </Link>
 
-      <div className="flex items-center gap-4">
-        {isAuthenticated ? (
-          <>
-            <span className="text-sm text-gray-600">{user?.firstName}</span>
-            <Link to="/dashboard" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-              Dashboard
-            </Link>
-            {isAdmin && (
-              <Link to="/admin" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                Admin
+        {/* Desktop nav */}
+        <div className="hidden items-center gap-3 sm:flex">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-ink-soft">Hi, {user?.firstName}</span>
+              <Link to="/dashboard" className="text-sm font-medium text-ink-soft hover:text-ink">
+                Dashboard
               </Link>
+              {isAdmin && (
+                <Link to="/admin" className="text-sm font-medium text-ink-soft hover:text-ink">
+                  Admin
+                </Link>
+              )}
+              <Button variant="secondary" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-sm font-medium text-ink-soft hover:text-ink">
+                Log in
+              </Link>
+              <Link to="/register">
+                <Button variant="primary">Register</Button>
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Mobile controls */}
+        <div className="flex items-center gap-1 sm:hidden">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen((current) => !current)}
+            aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-ink-soft hover:bg-surface"
+          >
+            {isMenuOpen ? (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
             )}
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
-            >
-              Register
-            </Link>
-          </>
-        )}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile menu panel */}
+      {isMenuOpen && (
+        <div className="border-t border-line bg-paper px-4 py-4 sm:hidden">
+          <div className="flex flex-col items-start gap-3">
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-ink-soft">Hi, {user?.firstName}</span>
+                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-ink">
+                  Dashboard
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-ink">
+                    Admin
+                  </Link>
+                )}
+                <Button variant="secondary" onClick={handleLogout} className="w-fit">
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setIsMenuOpen(false)} className="text-sm font-medium text-ink">
+                  Log in
+                </Link>
+                <Link to="/register" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="primary" className="w-fit">
+                    Register
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
+  );
+}
+
+function ThemeToggle({ theme, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label="Toggle dark mode"
+      className="flex h-9 w-9 items-center justify-center rounded-md text-ink-soft transition hover:bg-surface hover:text-ink"
+    >
+      {theme === 'dark' ? (
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="4" />
+          <path
+            strokeLinecap="round"
+            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+          />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+          <path d="M21 12.4A9 9 0 1111.6 3a7 7 0 009.4 9.4z" />
+        </svg>
+      )}
+    </button>
   );
 }

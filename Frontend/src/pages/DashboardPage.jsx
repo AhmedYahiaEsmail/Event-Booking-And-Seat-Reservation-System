@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import * as reservationsApi from '../api/reservationsApi';
 import { ApiError } from '../api/client';
+import StatusBadge from '../components/ui/StatusBadge';
+import Button from '../components/ui/Button';
+import { ErrorAlert } from '../components/ui/Alert';
+import EmptyState from '../components/ui/EmptyState';
+import { useToast } from '../context/ToastContext';
 
 export default function DashboardPage() {
   const [reservations, setReservations] = useState([]);
@@ -11,6 +16,7 @@ export default function DashboardPage() {
   const [errorList, setErrorList] = useState(null);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   const [cancelingId, setCancelingId] = useState(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     let isCancelled = false;
@@ -51,9 +57,6 @@ export default function DashboardPage() {
     };
   }, [refetchTrigger]);
 
-  // Derived on every render rather than stored as state — the backend's
-  // fromDate/toDate filters apply to BookingDateTime, not the event's date, so
-  // upcoming/past has to be computed here against eventStartDateTime.
   const now = new Date();
   const upcoming = reservations.filter(
     (r) => r.status === 'Confirmed' && new Date(r.eventStartDateTime) >= now
@@ -72,6 +75,7 @@ export default function DashboardPage() {
 
     try {
       await reservationsApi.cancelReservation(reservationId);
+      showToast('Reservation cancelled.');
       setRefetchTrigger((current) => current + 1);
     } catch (error) {
       if (error instanceof ApiError) {
@@ -90,54 +94,53 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <p className="text-sm text-gray-600">Loading reservations...</p>
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <p className="text-sm text-ink-soft">Loading reservations...</p>
       </div>
     );
   }
 
-  if (errorList) {
+  if (errorList || errorMessage) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <ul className="list-inside list-disc text-sm text-red-600">
-          {errorList.map((message) => (
-            <li key={message}>{message}</li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  if (errorMessage) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <p className="text-sm text-red-600">{errorMessage}</p>
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <ErrorAlert message={errorMessage} list={errorList} />
       </div>
     );
   }
 
   if (upcoming.length === 0 && past.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="mb-4 text-xl font-semibold text-gray-900">My Reservations</h1>
-        <p className="text-sm text-gray-600">
-          You haven&apos;t booked anything yet.{' '}
-          <Link to="/" className="font-medium text-gray-900 hover:underline">
-            Browse events
-          </Link>
-        </p>
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <div className="mb-8 flex flex-col gap-1">
+          <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">Your bookings</p>
+          <h1 className="font-display text-2xl font-semibold text-ink">My Reservations</h1>
+        </div>
+        <EmptyState
+          title="No reservations yet"
+          description="Browse the catalog and book your first event."
+          action={
+            <Link to="/">
+              <Button variant="secondary" className="mt-2">
+                Browse events
+              </Button>
+            </Link>
+          }
+        />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-xl font-semibold text-gray-900">My Reservations</h1>
+    <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mb-8 flex flex-col gap-1">
+        <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">Your bookings</p>
+        <h1 className="font-display text-2xl font-semibold text-ink">My Reservations</h1>
+      </div>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">Upcoming Reservations</h2>
+      <section className="mb-10">
+        <h2 className="mb-4 font-display text-base font-semibold text-ink">Upcoming</h2>
         {upcoming.length === 0 ? (
-          <p className="text-sm text-gray-600">No upcoming reservations.</p>
+          <p className="text-sm text-ink-soft">No upcoming reservations.</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {upcoming.map((reservation) => (
@@ -154,9 +157,9 @@ export default function DashboardPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">Past Reservations</h2>
+        <h2 className="mb-4 font-display text-base font-semibold text-ink">Past</h2>
         {past.length === 0 ? (
-          <p className="text-sm text-gray-600">No past reservations.</p>
+          <p className="text-sm text-ink-soft">No past reservations.</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {past.map((reservation) => (
@@ -170,37 +173,26 @@ export default function DashboardPage() {
 }
 
 function ReservationRow({ reservation, showCancelButton = false, isCanceling = false, onCancel }) {
-  const {
-    eventId,
-    eventTitle,
-    eventStartDateTime,
-    eventLocation,
-    numberOfSeats,
-    status,
-  } = reservation;
+  const { eventId, eventTitle, eventStartDateTime, eventLocation, numberOfSeats, status } = reservation;
 
   return (
-    <li className="flex flex-col gap-1 rounded-md border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-3 rounded-xl border border-line bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1">
-        <Link to={`/events/${eventId}`} className="text-sm font-medium text-gray-900 hover:underline">
-          {eventTitle || 'Deleted event'}
-        </Link>
-        <p className="text-sm text-gray-600">{format(parseISO(eventStartDateTime), 'PPp')}</p>
-        <p className="text-sm text-gray-600">{eventLocation}</p>
-        <p className="text-sm text-gray-600">
-          {numberOfSeats} seat(s) — {status}
-        </p>
+        <div className="flex items-center gap-2">
+          <Link to={`/events/${eventId}`} className="text-sm font-semibold text-ink hover:text-primary">
+            {eventTitle || 'Deleted event'}
+          </Link>
+          <StatusBadge status={status} />
+        </div>
+        <p className="font-mono text-xs text-ink-soft">{format(parseISO(eventStartDateTime), 'PPp')}</p>
+        <p className="text-sm text-ink-soft">{eventLocation}</p>
+        <p className="text-sm text-ink-soft">{numberOfSeats} seat(s)</p>
       </div>
 
       {showCancelButton && (
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isCanceling}
-          className="w-fit rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Button variant="danger" onClick={onCancel} disabled={isCanceling} className="w-fit">
           {isCanceling ? 'Cancelling...' : 'Cancel'}
-        </button>
+        </Button>
       )}
     </li>
   );

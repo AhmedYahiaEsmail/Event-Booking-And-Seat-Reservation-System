@@ -3,6 +3,12 @@ import { format, parseISO } from 'date-fns';
 import * as eventsApi from '../api/eventsApi';
 import { ApiError } from '../api/client';
 import AdminEventRow from '../components/AdminEventRow';
+import Input from '../components/ui/Input';
+import Textarea from '../components/ui/Textarea';
+import Button from '../components/ui/Button';
+import { ErrorAlert } from '../components/ui/Alert';
+import EmptyState from '../components/ui/EmptyState';
+import { useToast } from '../context/ToastContext';
 
 const EMPTY_FORM = {
   title: '',
@@ -27,10 +33,9 @@ export default function AdminDashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrorMessage, setFormErrorMessage] = useState(null);
   const [formErrorList, setFormErrorList] = useState(null);
-  // null => Create mode, set => Edit mode. Deliberately not tracked with a
-  // separate isEditing boolean — the presence of an event here is what the
-  // form's mode is derived from everywhere below.
   const [editingEvent, setEditingEvent] = useState(null);
+
+  const { showToast } = useToast();
 
   useEffect(() => {
     let isCancelled = false;
@@ -82,18 +87,12 @@ export default function AdminDashboardPage() {
     setFormValues({
       title: event.title,
       description: event.description ?? '',
-      // Reverse of the ISO -> datetime-local conversion the Create path does on
-      // submit, so the existing dates populate the datetime-local inputs correctly
-      // instead of showing raw ISO strings.
       startDateTime: format(parseISO(event.startDateTime), "yyyy-MM-dd'T'HH:mm"),
       endDateTime: format(parseISO(event.endDateTime), "yyyy-MM-dd'T'HH:mm"),
       location: event.location,
       speakerName: event.speakerName,
       speakerBio: event.speakerBio ?? '',
       totalSeats: event.totalSeats,
-      // rowVersion is deliberately NOT copied into formValues — it isn't a
-      // rendered field. It's read straight from editingEvent.rowVersion when the
-      // update payload is built in handleFormSubmit below.
     });
   }
 
@@ -112,8 +111,6 @@ export default function AdminDashboardPage() {
 
     const payload = {
       title: formValues.title,
-      // Omit optional fields entirely when left empty rather than sending
-      // empty strings.
       description: formValues.description.trim() || undefined,
       startDateTime: new Date(formValues.startDateTime).toISOString(),
       endDateTime: new Date(formValues.endDateTime).toISOString(),
@@ -126,20 +123,16 @@ export default function AdminDashboardPage() {
     try {
       if (editingEvent) {
         await eventsApi.updateEvent(editingEvent.id, { ...payload, rowVersion: editingEvent.rowVersion });
+        showToast('Event updated.');
       } else {
         await eventsApi.createEvent(payload);
+        showToast('Event created.');
       }
 
       setEditingEvent(null);
       setFormValues(EMPTY_FORM);
       setRefetchTrigger((current) => current + 1);
     } catch (error) {
-      // Checked first, ahead of the generic three-way branch: a 409 here means
-      // someone else changed this event since it was loaded, not a validation
-      // failure. error.message is already the exact backend-authored text, shown
-      // as-is. Recovery is reset-to-create-mode + refetch, per spec — no diffing
-      // or merge UI, and no attempt to keep the user's in-progress edits, since
-      // the rowVersion they submitted against is stale.
       if (error instanceof ApiError && error.status === 409) {
         setFormErrorMessage(error.message);
         setEditingEvent(null);
@@ -151,8 +144,6 @@ export default function AdminDashboardPage() {
         } else {
           setFormErrorMessage(error.message);
         }
-        // editingEvent/formValues intentionally left untouched here so the
-        // Admin can see and fix their input without losing their edits.
       } else {
         setFormErrorMessage('Something went wrong. Please try again.');
       }
@@ -168,6 +159,7 @@ export default function AdminDashboardPage() {
 
     try {
       await action(id);
+      showToast('Done.');
       setRefetchTrigger((current) => current + 1);
     } catch (error) {
       if (error instanceof ApiError) {
@@ -189,209 +181,153 @@ export default function AdminDashboardPage() {
   const handleComplete = (id) => runLifecycleAction(id, eventsApi.completeEvent);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-6 text-xl font-semibold text-gray-900">Admin Dashboard</h1>
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <div className="mb-8 flex flex-col gap-1">
+        <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">Admin</p>
+        <h1 className="font-display text-2xl font-semibold text-ink">Event Management</h1>
+      </div>
 
-      <section className="mb-10 rounded-md border border-gray-200 p-4">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          {editingEvent ? 'Edit Event' : 'Create Event'}
-        </h2>
+      <section className="mb-10 overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
+        <div className="border-b border-line bg-surface px-6 py-4">
+          <h2 className="font-display text-base font-semibold text-ink">
+            {editingEvent ? `Edit “${editingEvent.title}”` : 'Create a new event'}
+          </h2>
+        </div>
 
-        <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="title" className="text-sm font-medium text-gray-700">
-              Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              value={formValues.title}
-              onChange={(e) => handleFormChange('title', e.target.value)}
-              required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-            />
-          </div>
+        <form onSubmit={handleFormSubmit} className="flex flex-col gap-4 p-6">
+          <Input
+            label="Title"
+            id="title"
+            type="text"
+            value={formValues.title}
+            onChange={(e) => handleFormChange('title', e.target.value)}
+            required
+          />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="description" className="text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={formValues.description}
-              onChange={(e) => handleFormChange('description', e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-            />
-          </div>
+          <Textarea
+            label="Description"
+            id="description"
+            value={formValues.description}
+            onChange={(e) => handleFormChange('description', e.target.value)}
+          />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="startDateTime" className="text-sm font-medium text-gray-700">
-                Start
-              </label>
-              <input
-                id="startDateTime"
-                type="datetime-local"
-                value={formValues.startDateTime}
-                onChange={(e) => handleFormChange('startDateTime', e.target.value)}
-                required
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label htmlFor="endDateTime" className="text-sm font-medium text-gray-700">
-                End
-              </label>
-              <input
-                id="endDateTime"
-                type="datetime-local"
-                value={formValues.endDateTime}
-                onChange={(e) => handleFormChange('endDateTime', e.target.value)}
-                required
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="location" className="text-sm font-medium text-gray-700">
-              Location
-            </label>
-            <input
-              id="location"
-              type="text"
-              value={formValues.location}
-              onChange={(e) => handleFormChange('location', e.target.value)}
+            <Input
+              label="Start"
+              id="startDateTime"
+              type="datetime-local"
+              value={formValues.startDateTime}
+              onChange={(e) => handleFormChange('startDateTime', e.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="speakerName" className="text-sm font-medium text-gray-700">
-              Speaker name
-            </label>
-            <input
-              id="speakerName"
-              type="text"
-              value={formValues.speakerName}
-              onChange={(e) => handleFormChange('speakerName', e.target.value)}
+            <Input
+              label="End"
+              id="endDateTime"
+              type="datetime-local"
+              value={formValues.endDateTime}
+              onChange={(e) => handleFormChange('endDateTime', e.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="speakerBio" className="text-sm font-medium text-gray-700">
-              Speaker bio
-            </label>
-            <textarea
-              id="speakerBio"
-              value={formValues.speakerBio}
-              onChange={(e) => handleFormChange('speakerBio', e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-            />
-          </div>
+          <Input
+            label="Location"
+            id="location"
+            type="text"
+            value={formValues.location}
+            onChange={(e) => handleFormChange('location', e.target.value)}
+            required
+          />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="totalSeats" className="text-sm font-medium text-gray-700">
-              Total seats
-            </label>
-            <input
+          <Input
+            label="Speaker name"
+            id="speakerName"
+            type="text"
+            value={formValues.speakerName}
+            onChange={(e) => handleFormChange('speakerName', e.target.value)}
+            required
+          />
+
+          <Textarea
+            label="Speaker bio"
+            id="speakerBio"
+            value={formValues.speakerBio}
+            onChange={(e) => handleFormChange('speakerBio', e.target.value)}
+          />
+
+          <div className="w-40">
+            <Input
+              label="Total seats"
               id="totalSeats"
               type="number"
               min={1}
               value={formValues.totalSeats}
               onChange={(e) => handleFormChange('totalSeats', e.target.value)}
               required
-              className="w-32 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
           </div>
 
-          {formErrorList && (
-            <ul className="list-inside list-disc text-sm text-red-600">
-              {formErrorList.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
-          )}
+          <ErrorAlert message={formErrorMessage} list={formErrorList} />
 
-          {formErrorMessage && <p className="text-sm text-red-600">{formErrorMessage}</p>}
-
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-fit rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+          <div className="flex gap-2 pt-1">
+            <Button type="submit" disabled={isSubmitting} className="w-fit">
               {isSubmitting
                 ? editingEvent
                   ? 'Saving...'
                   : 'Creating...'
                 : editingEvent
-                  ? 'Save Changes'
-                  : 'Create Event'}
-            </button>
+                  ? 'Save changes'
+                  : 'Create event'}
+            </Button>
 
             {editingEvent && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                className="w-fit rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-              >
+              <Button type="button" variant="secondary" onClick={handleCancelEdit} className="w-fit">
                 Cancel
-              </button>
+              </Button>
             )}
           </div>
         </form>
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">All Events</h2>
+        <h2 className="mb-4 font-display text-base font-semibold text-ink">All Events</h2>
 
-        {isLoading && <p className="text-sm text-gray-600">Loading events...</p>}
+        {isLoading && <p className="text-sm text-ink-soft">Loading events...</p>}
 
-        {!isLoading && errorList && (
-          <ul className="list-inside list-disc text-sm text-red-600">
-            {errorList.map((message) => (
-              <li key={message}>{message}</li>
-            ))}
-          </ul>
-        )}
-
-        {!isLoading && !errorList && errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+        {!isLoading && (errorList || errorMessage) && <ErrorAlert message={errorMessage} list={errorList} />}
 
         {!isLoading && !errorMessage && !errorList && events.length === 0 && (
-          <p className="text-sm text-gray-600">No events yet.</p>
+          <EmptyState title="No events yet" description="Create your first event using the form above." />
         )}
 
         {!isLoading && !errorMessage && !errorList && events.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="border-b border-gray-300">
-                  <th className="px-3 py-2 text-sm font-medium text-gray-700">Title</th>
-                  <th className="px-3 py-2 text-sm font-medium text-gray-700">Status</th>
-                  <th className="px-3 py-2 text-sm font-medium text-gray-700">Start Date</th>
-                  <th className="px-3 py-2 text-sm font-medium text-gray-700">Seats</th>
-                  <th className="px-3 py-2 text-sm font-medium text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((event) => (
-                  <AdminEventRow
-                    key={event.id}
-                    event={event}
-                    isActioning={actioningId === event.id}
-                    onPublish={handlePublish}
-                    onCancel={handleCancel}
-                    onComplete={handleComplete}
-                    onEdit={handleEditClick}
-                  />
-                ))}
-              </tbody>
-            </table>
+          <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-line bg-surface">
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">Title</th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">Status</th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">Start</th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">Seats</th>
+                    <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map((event) => (
+                    <AdminEventRow
+                      key={event.id}
+                      event={event}
+                      isActioning={actioningId === event.id}
+                      onPublish={handlePublish}
+                      onCancel={handleCancel}
+                      onComplete={handleComplete}
+                      onEdit={handleEditClick}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </section>

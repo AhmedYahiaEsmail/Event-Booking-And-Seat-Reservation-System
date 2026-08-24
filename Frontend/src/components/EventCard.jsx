@@ -1,35 +1,41 @@
 import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
+import StatusBadge from './ui/StatusBadge';
+import SeatGauge from './ui/SeatGauge';
 
 export default function EventCard({ event }) {
   const isSoldOut = event.availableSeats === 0;
 
-  const dateRange = `${format(parseISO(event.startDateTime), 'PPp')} – ${format(
-    parseISO(event.endDateTime),
-    'PPp'
-  )}`;
-
   return (
     <Link
       to={`/events/${event.id}`}
-      className="flex flex-col gap-2 rounded-md border border-gray-200 p-4 transition hover:border-gray-400 hover:shadow-sm"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-paper shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="flex items-start justify-between gap-2">
-        <h2 className="text-base font-semibold text-gray-900">{event.title}</h2>
-        {isSoldOut && (
-          <span className="shrink-0 rounded-md bg-gray-900 px-2 py-0.5 text-xs font-medium text-white">
-            Sold out
-          </span>
-        )}
+      <div className="flex flex-col gap-2 p-5">
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">
+            {format(parseISO(event.startDateTime), 'MMM d, yyyy')}
+          </p>
+          {isSoldOut && <StatusBadge status="Cancelled" statusLabel="Sold out" />}
+        </div>
+
+        <h2 className="font-display text-lg font-semibold leading-snug text-ink group-hover:text-primary">
+          {event.title}
+        </h2>
+
+        <p className="text-sm text-ink-soft">{event.location}</p>
+        <p className="text-sm text-ink-soft">{event.speakerName}</p>
       </div>
 
-      <p className="text-sm text-gray-600">{dateRange}</p>
-      <p className="text-sm text-gray-600">{event.location}</p>
-      <p className="text-sm text-gray-600">{event.speakerName}</p>
+      {/* Ticket perforation divider */}
+      <div className="relative border-t border-dashed border-line">
+        <span className="absolute -left-3 -top-3 h-6 w-6 rounded-full bg-surface" />
+        <span className="absolute -right-3 -top-3 h-6 w-6 rounded-full bg-surface" />
+      </div>
 
-      <p className="mt-1 text-sm font-medium text-gray-700">
-        {event.availableSeats} / {event.totalSeats} seats available
-      </p>
+      <div className="p-5 pt-4">
+        <SeatGauge available={event.availableSeats} total={event.totalSeats} />
+      </div>
     </Link>
   );
 }

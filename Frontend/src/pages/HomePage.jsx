@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import * as eventsApi from '../api/eventsApi';
 import { ApiError } from '../api/client';
 import EventCard from '../components/EventCard';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import { ErrorAlert } from '../components/ui/Alert';
+import EmptyState from '../components/ui/EmptyState';
+import EventCardSkeleton from '../components/EventCardSkeleton';
 
 const PAGE_SIZE = 12;
 
@@ -28,7 +33,6 @@ export default function HomePage() {
       try {
         const data = await eventsApi.getEvents({
           status: 'Published',
-          // Omit the key entirely rather than sending an empty string.
           searchTerm: trimmedSearchTerm || undefined,
           pageNumber,
           pageSize: PAGE_SIZE,
@@ -83,67 +87,59 @@ export default function HomePage() {
   const isNextDisabled = events.length < PAGE_SIZE;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-6 text-xl font-semibold text-gray-900">Event Catalog</h1>
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <div className="mb-8 flex flex-col gap-1">
+        <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">Upcoming</p>
+        <h1 className="font-display text-2xl font-semibold text-ink">Event Catalog</h1>
+      </div>
 
-      <form onSubmit={handleSearchSubmit} className="mb-6 flex gap-2">
-        <input
-          type="text"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          placeholder="Search events..."
-          className="w-full max-w-sm rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
-        />
-        <button
-          type="submit"
-          className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
-        >
+      <form onSubmit={handleSearchSubmit} className="mb-8 flex gap-2">
+        <div className="w-full max-w-sm">
+          <Input
+            type="text"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder="Search by title, speaker, location..."
+          />
+        </div>
+        <Button type="submit" variant="secondary">
           Search
-        </button>
+        </Button>
       </form>
 
-      {isLoading && <p className="text-sm text-gray-600">Loading events...</p>}
-
-      {!isLoading && errorList && (
-        <ul className="list-inside list-disc text-sm text-red-600">
-          {errorList.map((message) => (
-            <li key={message}>{message}</li>
+      {isLoading && (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <EventCardSkeleton key={index} />
           ))}
-        </ul>
+        </div>
       )}
 
-      {!isLoading && !errorList && errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+      <ErrorAlert message={!errorList ? errorMessage : null} list={errorList} />
 
       {!isLoading && !errorMessage && !errorList && events.length === 0 && (
-        <p className="text-sm text-gray-600">No events found.</p>
+        <EmptyState
+          title="No events found"
+          description="Try a different search term, or check back later for new workshops and talks."
+        />
       )}
 
       {!isLoading && !errorMessage && !errorList && events.length > 0 && (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
 
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              disabled={isPreviousDisabled}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Button variant="secondary" onClick={handlePrevious} disabled={isPreviousDisabled}>
               Previous
-            </button>
-            <span className="text-sm text-gray-600">Page {pageNumber}</span>
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={isNextDisabled}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            </Button>
+            <span className="font-mono text-xs text-ink-soft">Page {pageNumber}</span>
+            <Button variant="secondary" onClick={handleNext} disabled={isNextDisabled}>
               Next
-            </button>
+            </Button>
           </div>
         </>
       )}

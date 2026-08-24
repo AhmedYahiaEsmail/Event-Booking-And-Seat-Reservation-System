@@ -1,6 +1,5 @@
 <Solution>
   <Project Path="EventBooking.API/EventBooking.API.csproj" />
-  <Project Path="EventBooking.Application.UnitTests/EventBooking.Application.UnitTests.csproj" Id="337be75a-cf49-472b-b5f4-58fb95908a15" />
   <Project Path="EventBooking.Application/EventBooking.Application.csproj" />
   <Project Path="EventBooking.Domain/EventBooking.Domain.csproj" />
   <Project Path="EventBooking.Infrastructure/EventBooking.Infrastructure.csproj" />

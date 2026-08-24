@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import { ErrorAlert } from '../components/ui/Alert';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -40,64 +43,47 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-65px)] items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-md border border-gray-200 p-6">
-        <h1 className="mb-6 text-lg font-semibold text-gray-900">Log In</h1>
+    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
+        <div className="h-1.5 w-full bg-primary" />
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
+        <div className="p-7">
+          <p className="font-mono text-xs uppercase tracking-wide text-ink-faint">Welcome back</p>
+          <h1 className="mt-1 font-display text-xl font-semibold text-ink">Log in</h1>
+
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <Input
+              label="Email"
               id="email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
-          </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
+            <Input
+              label="Password"
               id="password"
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             />
-          </div>
 
-          {errorList && (
-            <ul className="list-inside list-disc text-sm text-red-600">
-              {errorList.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
-          )}
+            <ErrorAlert message={errorMessage} list={errorList} />
 
-          {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+            <Button type="submit" disabled={isSubmitting} className="mt-1 w-full">
+              {isSubmitting ? 'Logging in...' : 'Log in'}
+            </Button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
-
-        <p className="mt-4 text-sm text-gray-600">
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="font-medium text-gray-900 hover:underline">
-            Register
-          </Link>
-        </p>
+          <p className="mt-6 text-center text-sm text-ink-soft">
+            Don&apos;t have an account?{' '}
+            <Link to="/register" className="font-medium text-primary hover:underline">
+              Register
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
