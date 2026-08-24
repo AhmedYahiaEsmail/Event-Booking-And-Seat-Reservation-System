@@ -3,4 +3,5 @@
   <Project Path="EventBooking.Application/EventBooking.Application.csproj" />
   <Project Path="EventBooking.Domain/EventBooking.Domain.csproj" />
   <Project Path="EventBooking.Infrastructure/EventBooking.Infrastructure.csproj" />
+  <Project Path="EventBooking.UnitTests/EventBooking.UnitTests.csproj" Id="554afb3c-5e6d-4b14-b95d-2ec59edc459a" />
 </Solution>
