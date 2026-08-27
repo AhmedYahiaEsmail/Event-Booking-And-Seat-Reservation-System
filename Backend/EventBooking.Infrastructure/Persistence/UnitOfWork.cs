@@ -1,7 +1,4 @@
 ﻿using EventBooking.Application.Interfaces.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Infrastructure.Persistence;
 

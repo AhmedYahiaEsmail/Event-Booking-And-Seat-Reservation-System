@@ -1,7 +1,6 @@
 ﻿using EventBooking.Domain.Entities;
 using EventBooking.UnitTests.TestHelpers;
 using FluentAssertions;
-using Xunit;
 
 namespace EventBooking.UnitTests.Domain;
 

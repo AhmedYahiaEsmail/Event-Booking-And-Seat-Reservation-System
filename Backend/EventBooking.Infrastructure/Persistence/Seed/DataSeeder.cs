@@ -2,8 +2,6 @@
 using EventBooking.Domain.Entities;
 using EventBooking.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
 
 namespace EventBooking.Infrastructure.Persistence.Seed;
 

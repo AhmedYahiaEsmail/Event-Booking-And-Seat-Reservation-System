@@ -3,7 +3,6 @@ using EventBooking.Application.DTOs.Reservations;
 using EventBooking.Application.Interfaces.Reservations;
 using EventBooking.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 

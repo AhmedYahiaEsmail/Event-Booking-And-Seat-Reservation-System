@@ -1,9 +1,6 @@
 ﻿using EventBooking.Domain.Common;
 using EventBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Infrastructure.Persistence;
 
@@ -16,6 +13,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,7 +31,7 @@ public class ApplicationDbContext : DbContext
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.SetCreationInfo(); 
+                    entry.Entity.SetCreationInfo();
                     break;
 
                 case EntityState.Modified:

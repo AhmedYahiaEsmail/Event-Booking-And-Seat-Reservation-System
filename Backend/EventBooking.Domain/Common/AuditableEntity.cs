@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EventBooking.Domain.Common;
+﻿namespace EventBooking.Domain.Common;
 
 public abstract class AuditableEntity
 {

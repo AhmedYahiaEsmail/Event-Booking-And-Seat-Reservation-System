@@ -3,9 +3,6 @@ using EventBooking.Application.Exceptions;
 using EventBooking.Application.Interfaces.Events;
 using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Application.Services.Events;
 

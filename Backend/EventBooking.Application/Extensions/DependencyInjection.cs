@@ -6,9 +6,6 @@ using EventBooking.Application.Services.Events;
 using EventBooking.Application.Services.Reservations;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Application.Extensions;
 

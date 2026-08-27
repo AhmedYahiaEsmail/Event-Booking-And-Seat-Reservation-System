@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using EventBooking.Domain.Common;
+﻿using EventBooking.Domain.Common;
 using EventBooking.Domain.Enums;
 using EventBooking.Domain.Exceptions;
 

@@ -2,7 +2,6 @@
 using EventBooking.Domain.Enums;
 using EventBooking.Domain.Exceptions;
 using FluentAssertions;
-using Xunit;
 
 namespace EventBooking.UnitTests.Domain;
 

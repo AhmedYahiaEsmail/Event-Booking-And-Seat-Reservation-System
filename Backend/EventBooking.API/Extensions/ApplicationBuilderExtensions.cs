@@ -1,6 +1,4 @@
 ﻿using EventBooking.API.Middleware;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 
 namespace EventBooking.API.Extensions;
 

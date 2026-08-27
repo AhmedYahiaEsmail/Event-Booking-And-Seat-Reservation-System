@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EventBooking.API.Filters;

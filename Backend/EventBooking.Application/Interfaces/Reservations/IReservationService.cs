@@ -1,9 +1,5 @@
 ﻿using EventBooking.Application.DTOs.Reservations;
 using EventBooking.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EventBooking.Application.Interfaces.Reservations;
 

@@ -3,10 +3,9 @@ using EventBooking.Domain.Entities;
 using EventBooking.Infrastructure.Configurations;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace EventBooking.Infrastructure.Identity;
@@ -42,5 +41,18 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public RefreshTokenResult GenerateRefreshToken()
+    {
+        // Opaque, cryptographically-random token — deliberately NOT a JWT. It carries no
+        // claims of its own; it's just a high-entropy lookup key stored server-side in
+        // RefreshTokens, which is what makes server-side revocation (Revoke/reuse
+        // detection in AuthService) possible in the first place.
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        var token = Convert.ToBase64String(randomBytes);
+        var expiresAt = DateTimeOffset.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryInDays);
+
+        return new RefreshTokenResult(token, expiresAt);
     }
 }

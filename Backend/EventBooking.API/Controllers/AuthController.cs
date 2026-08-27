@@ -1,6 +1,7 @@
 ﻿using EventBooking.API.Common;
 using EventBooking.Application.DTOs.Auth;
 using EventBooking.Application.Interfaces.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventBooking.API.Controllers;
@@ -28,5 +29,20 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
         return Ok(ApiResponse<AuthResponse>.Success(response, "Login successful."));
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _authService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
+        return Ok(ApiResponse<AuthResponse>.Success(response, "Token refreshed successfully."));
+    }
+
+    [HttpPost("revoke-token")]
+    [Authorize]
+    public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        await _authService.RevokeTokenAsync(request.RefreshToken, cancellationToken);
+        return NoContent();
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EventBooking.Application.DTOs.Events;
+﻿namespace EventBooking.Application.DTOs.Events;
 
 public record CreateEventRequest(
     string Title,

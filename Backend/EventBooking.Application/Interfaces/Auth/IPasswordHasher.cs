@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EventBooking.Application.Interfaces.Auth;
+﻿namespace EventBooking.Application.Interfaces.Auth;
 
 public interface IPasswordHasher
 {

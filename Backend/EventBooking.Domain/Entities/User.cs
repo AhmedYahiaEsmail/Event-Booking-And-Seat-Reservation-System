@@ -1,9 +1,5 @@
 ﻿using EventBooking.Domain.Common;
 using EventBooking.Domain.Enums;
-using EventBooking.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Domain.Entities;
 

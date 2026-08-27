@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using EventBooking.Domain.Entities;
+﻿using EventBooking.Domain.Entities;
+using System.Reflection;
 
 namespace EventBooking.UnitTests.TestHelpers;
 

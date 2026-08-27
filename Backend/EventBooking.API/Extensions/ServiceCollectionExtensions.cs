@@ -1,7 +1,5 @@
 ﻿using EventBooking.API.Filters;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
 
 namespace EventBooking.API.Extensions;

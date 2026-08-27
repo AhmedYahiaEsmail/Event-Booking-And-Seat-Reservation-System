@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EventBooking.Application.Exceptions;
+﻿namespace EventBooking.Application.Exceptions;
 
 public class ReservationNotFoundException : Exception
 {

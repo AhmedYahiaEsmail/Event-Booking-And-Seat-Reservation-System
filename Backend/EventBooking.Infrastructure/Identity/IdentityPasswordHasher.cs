@@ -1,13 +1,10 @@
 ﻿using EventBooking.Application.Interfaces.Auth;
 using EventBooking.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Infrastructure.Identity;
 
-public class IdentityPasswordHasher : IPasswordHasher 
+public class IdentityPasswordHasher : IPasswordHasher
 {
     private readonly PasswordHasher<User> _passwordHasher = new();
 

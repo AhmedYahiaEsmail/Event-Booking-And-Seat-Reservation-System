@@ -1,8 +1,5 @@
 ﻿using EventBooking.Application.DTOs.Auth;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Application.Validators.Auth;
 

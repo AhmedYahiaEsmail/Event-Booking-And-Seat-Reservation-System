@@ -8,7 +8,6 @@ using EventBooking.Domain.Exceptions;
 using EventBooking.UnitTests.TestHelpers;
 using FluentAssertions;
 using Moq;
-using Xunit;
 
 namespace EventBooking.UnitTests.Application.Services;
 

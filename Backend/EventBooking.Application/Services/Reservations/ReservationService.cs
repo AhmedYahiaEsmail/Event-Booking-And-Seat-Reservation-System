@@ -5,10 +5,6 @@ using EventBooking.Application.Interfaces.Reservations;
 using EventBooking.Domain.Entities;
 using EventBooking.Domain.Enums;
 using EventBooking.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EventBooking.Application.Services.Reservations;
 

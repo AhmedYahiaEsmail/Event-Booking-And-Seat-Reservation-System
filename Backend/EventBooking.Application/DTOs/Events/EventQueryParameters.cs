@@ -1,7 +1,4 @@
 ﻿using EventBooking.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Application.DTOs.Events;
 

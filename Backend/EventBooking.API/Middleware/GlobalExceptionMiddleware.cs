@@ -1,9 +1,7 @@
 ﻿using EventBooking.API.Common;
 using EventBooking.Application.Exceptions;
 using EventBooking.Domain.Exceptions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
 
@@ -77,6 +75,10 @@ public class GlobalExceptionMiddleware
                 statusCode = HttpStatusCode.BadRequest;
                 message = "Validation failed.";
                 errors = e.Errors.Select(x => x.ErrorMessage).ToList();
+                break;
+            case InvalidRefreshTokenException e:
+                statusCode = HttpStatusCode.Unauthorized;
+                message = e.Message;
                 break;
         }
 

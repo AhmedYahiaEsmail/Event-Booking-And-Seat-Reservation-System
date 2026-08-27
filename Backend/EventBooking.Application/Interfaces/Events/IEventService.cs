@@ -1,7 +1,4 @@
 ﻿using EventBooking.Application.DTOs.Events;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Application.Interfaces.Events;
 

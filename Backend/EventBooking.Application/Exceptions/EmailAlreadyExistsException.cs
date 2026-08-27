@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EventBooking.Application.Exceptions;
+﻿namespace EventBooking.Application.Exceptions;
 
 public class EmailAlreadyExistsException : Exception
 {

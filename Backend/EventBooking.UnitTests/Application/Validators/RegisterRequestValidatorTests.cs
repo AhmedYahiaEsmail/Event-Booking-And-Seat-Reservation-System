@@ -1,7 +1,6 @@
 ﻿using EventBooking.Application.DTOs.Auth;
 using EventBooking.Application.Validators.Auth;
 using FluentValidation.TestHelper;
-using Xunit;
 
 namespace EventBooking.UnitTests.Application.Validators;
 

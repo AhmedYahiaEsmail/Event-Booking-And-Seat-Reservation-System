@@ -2,9 +2,6 @@
 using EventBooking.Domain.Entities;
 using EventBooking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EventBooking.Infrastructure.Repositories;
 
@@ -33,5 +30,12 @@ public class UserRepository : IUserRepository
     public async Task AddAsync(User user, CancellationToken cancellationToken = default)
     {
         await _context.Users.AddAsync(user, cancellationToken);
+    }
+
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 }

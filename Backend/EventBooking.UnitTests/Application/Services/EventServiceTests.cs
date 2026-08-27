@@ -7,7 +7,6 @@ using EventBooking.Domain.Enums;
 using EventBooking.UnitTests.TestHelpers;
 using FluentAssertions;
 using Moq;
-using Xunit;
 
 namespace EventBooking.UnitTests.Application.Services;
 

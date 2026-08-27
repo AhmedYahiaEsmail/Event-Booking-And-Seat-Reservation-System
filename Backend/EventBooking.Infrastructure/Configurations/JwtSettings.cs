@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EventBooking.Infrastructure.Configurations;
 
@@ -21,4 +18,7 @@ public class JwtSettings
 
     [Range(1, int.MaxValue, ErrorMessage = "ExpiryInMinutes must be greater than zero.")]
     public int ExpiryInMinutes { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "RefreshTokenExpiryInDays must be greater than zero.")]
+    public int RefreshTokenExpiryInDays { get; set; } = 7;
 }

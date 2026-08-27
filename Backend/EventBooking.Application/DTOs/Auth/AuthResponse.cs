@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EventBooking.Application.DTOs.Auth;
+﻿namespace EventBooking.Application.DTOs.Auth;
 
 public record AuthResponse(
     Guid UserId,
@@ -10,4 +6,6 @@ public record AuthResponse(
     string LastName,
     string Email,
     string Role,
-    string Token);
+    string Token,
+    string RefreshToken,
+    DateTimeOffset RefreshTokenExpiresAt);
