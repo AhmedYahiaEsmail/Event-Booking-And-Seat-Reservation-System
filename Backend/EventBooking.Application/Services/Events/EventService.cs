@@ -1,5 +1,6 @@
 ﻿using EventBooking.Application.DTOs.Events;
 using EventBooking.Application.Exceptions;
+using EventBooking.Application.Interfaces.Common;
 using EventBooking.Application.Interfaces.Events;
 using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Domain.Entities;
@@ -10,11 +11,13 @@ public class EventService : IEventService
 {
     private readonly IEventRepository _eventRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public EventService(IEventRepository eventRepository, IUnitOfWork unitOfWork)
+    public EventService(IEventRepository eventRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
     {
         _eventRepository = eventRepository;
         _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<EventResponse> CreateEventAsync(CreateEventRequest request, CancellationToken cancellationToken = default)
@@ -111,7 +114,7 @@ public class EventService : IEventService
             throw new EventNotFoundException(id);
         }
 
-        eventEntity.Publish(DateTimeOffset.UtcNow);
+        eventEntity.Publish(_dateTimeProvider.UtcNow);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -141,7 +144,7 @@ public class EventService : IEventService
             throw new EventNotFoundException(id);
         }
 
-        eventEntity.Complete(DateTimeOffset.UtcNow);
+        eventEntity.Complete(_dateTimeProvider.UtcNow);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

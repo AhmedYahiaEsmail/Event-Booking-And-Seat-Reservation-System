@@ -3,15 +3,6 @@ using System.Reflection;
 
 namespace EventBooking.UnitTests.TestHelpers;
 
-/// <summary>
-/// Reservation.Event عندها private setter لأن EF Core هو المسؤول عنها عادةً (relationship
-/// fixup وقت الـ Include). في الـ Application-layer unit tests إحنا بنـ mock الـ
-/// repositories فمفيش EF حقيقي بيعمل الـ fixup ده، فمحتاجين طريقة نحاكي بيها "الـ
-/// reservation ده اتحمل من الـ DB ومعاه الـ Event بتاعه" - وده بالظبط اللي
-/// ReservationRepository.GetByIdAsync بيرجعه في الواقع (Include(r => r.Event)).
-///
-/// استخدام reflection هنا مقصود ومحدود لغرض التيست بس؛ مفيش أي كود إنتاجي بيعمل كده.
-/// </summary>
 public static class ReservationTestFactory
 {
     public static Reservation CreateConfirmedReservation(

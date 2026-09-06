@@ -1,5 +1,6 @@
 ﻿using EventBooking.Application.DTOs.Reservations;
 using EventBooking.Application.Exceptions;
+using EventBooking.Application.Interfaces.Common;
 using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Application.Services.Reservations;
 using EventBooking.Domain.Entities;
@@ -16,14 +17,18 @@ public class ReservationServiceTests
     private readonly Mock<IReservationRepository> _reservationRepositoryMock = new();
     private readonly Mock<IEventRepository> _eventRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
+    private readonly Mock<IDateTimeProvider> _dateTimeProviderMock = new();
+
     private readonly ReservationService _sut;
 
     public ReservationServiceTests()
     {
+        _dateTimeProviderMock.Setup(d => d.UtcNow).Returns(EventTestFactory.Now);
         _sut = new ReservationService(
             _reservationRepositoryMock.Object,
             _eventRepositoryMock.Object,
-            _unitOfWorkMock.Object);
+            _unitOfWorkMock.Object,
+            _dateTimeProviderMock.Object);
     }
 
     // ==========================================

@@ -1,6 +1,8 @@
 ﻿using EventBooking.Application.Interfaces.Auth;
+using EventBooking.Application.Interfaces.Common;
 using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Domain.Enums;
+using EventBooking.Infrastructure.Common;
 using EventBooking.Infrastructure.Configurations;
 using EventBooking.Infrastructure.Identity;
 using EventBooking.Infrastructure.Persistence;
@@ -69,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         return services;
     }

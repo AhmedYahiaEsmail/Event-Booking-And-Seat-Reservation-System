@@ -1,5 +1,6 @@
 ﻿using EventBooking.Application.DTOs.Events;
 using EventBooking.Application.Exceptions;
+using EventBooking.Application.Interfaces.Common;
 using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Application.Services.Events;
 using EventBooking.Domain.Entities;
@@ -14,11 +15,13 @@ public class EventServiceTests
 {
     private readonly Mock<IEventRepository> _eventRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
+    private readonly Mock<IDateTimeProvider> _dateTimeProviderMock = new();
     private readonly EventService _sut;
 
     public EventServiceTests()
     {
-        _sut = new EventService(_eventRepositoryMock.Object, _unitOfWorkMock.Object);
+        _dateTimeProviderMock.Setup(d => d.UtcNow).Returns(EventTestFactory.Now);
+        _sut = new EventService(_eventRepositoryMock.Object, _unitOfWorkMock.Object, _dateTimeProviderMock.Object);
     }
 
     // ==========================================

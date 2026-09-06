@@ -1,5 +1,6 @@
 ﻿using EventBooking.Application.DTOs.Reservations;
 using EventBooking.Application.Exceptions;
+using EventBooking.Application.Interfaces.Common;
 using EventBooking.Application.Interfaces.Persistence;
 using EventBooking.Application.Interfaces.Reservations;
 using EventBooking.Domain.Entities;
@@ -13,15 +14,18 @@ public class ReservationService : IReservationService
     private readonly IReservationRepository _reservationRepository;
     private readonly IEventRepository _eventRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
     public ReservationService(
         IReservationRepository reservationRepository,
         IEventRepository eventRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider)
     {
         _reservationRepository = reservationRepository;
         _eventRepository = eventRepository;
         _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<ReservationResponse> ReserveSeatsAsync(
@@ -48,8 +52,7 @@ public class ReservationService : IReservationService
         // must be Published, start time must not have passed, and there must be enough
         // AvailableSeats. Ordinary business-rule violations surface as DomainException
         // (-> 400 via the existing middleware), independent of the concurrency path below.
-        eventEntity.ReserveSeats(request.NumberOfSeats, DateTimeOffset.UtcNow);
-
+        eventEntity.ReserveSeats(request.NumberOfSeats, _dateTimeProvider.UtcNow);
         var reservation = new Reservation
         {
             Id = Guid.NewGuid(),

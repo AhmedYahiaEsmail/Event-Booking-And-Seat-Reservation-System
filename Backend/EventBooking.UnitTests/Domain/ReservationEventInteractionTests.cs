@@ -4,13 +4,6 @@ using FluentAssertions;
 
 namespace EventBooking.UnitTests.Domain;
 
-/// <summary>
-/// دول مش unit tests معزولة لـ entity واحد بس — بيغطوا الـ interaction بين Event و
-/// Reservation زي ما بيحصل فعليًا في ReservationService.ReserveSeatsAsync /
-/// CancelReservationAsync، لكن بالكامل في الميموري من غير أي DB أو Mocking. الهدف إننا
-/// نتأكد إن الـ invariant الأساسي (seats decrement on reserve, increment on cancel)
-/// شغال صح على مستوى الـ domain قبل حتى ما نوصل لمرحلة الـ Integration Tests.
-/// </summary>
 public class ReservationEventInteractionTests
 {
     [Fact]
