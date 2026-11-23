@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# .NET ignores
+bin/
+obj/
+.vs/
+
+# Node ignores
+node_modules/
+dist/
+.env
